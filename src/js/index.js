@@ -2,10 +2,41 @@ const board = document.getElementById("board");
 
 // factory pattern
 class Car {
-  constructor(doors, brand, price) {
+  actions = [];
+  constructor(doors, brand, price, gas = 100) {
     this.doors = doors;
     this.brand = brand;
     this.price = price;
+    this.gas = gas;
+  }
+
+  setGasLevel(val) {
+    this.gas = val;
+    this.notifyAll();
+  }
+
+  register(observer) {
+    this.actions.push(observer);
+  }
+
+  unregister(observer) {
+    this.actions.filter((element) => {
+      return element !== observer;
+    });
+  }
+
+  actionIterator() {
+    for (let action of this.actions) {
+      console.log(action);
+    }
+  }
+
+  notifyAll() {
+    return this.actions.forEach(
+      function (element) {
+        element.update(this);
+      }.bind(this)
+    );
   }
 }
 
@@ -31,6 +62,14 @@ class TruckFactory {
   }
 }
 
+let carMixin = {
+  revEngine: function () {
+    console.log(`The ${this.brand} is doing Zoom Zoom`);
+  },
+};
+// copy the methods
+Object.assign(Car.prototype, carMixin);
+
 const autoManufacturer = (type, model) => {
   const carFactory = new CarFactory();
   const truckFactory = new TruckFactory();
@@ -44,7 +83,8 @@ const autoManufacturer = (type, model) => {
 
 const fordTruck = autoManufacturer("truck", "f150");
 const civic = autoManufacturer("car", "civic");
-console.log(fordTruck, civic);
+console.log(fordTruck, civic, carMixin);
+civic.revEngine();
 
 // const factory = new CarFactory();
 // const corolla = factory.createCar("corolla");
